@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>CRレポート</title>
+<style>
+:root{--main:#2A6DB5;--sub:#4CAFD5;--accent:#E79C38}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;
+  background:linear-gradient(135deg,#eaf1fa,#e8f6fb);color:#1f2a37;
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Meiryo,sans-serif}
+form{background:#fff;border-radius:14px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 10px 30px rgba(20,60,120,.12);border-top:5px solid var(--main)}
+h1{font-size:17px;margin:0 0 4px;color:var(--main)}
+p{font-size:12.5px;color:#6b7785;margin:0 0 18px}
+input[type=password]{width:100%;padding:11px 12px;border:1px solid #d5dde8;border-radius:8px;font-size:15px}
+input[type=password]:focus{outline:2px solid var(--sub);border-color:transparent}
+label{display:flex;gap:6px;align-items:center;font-size:12.5px;color:#6b7785;margin:10px 0 16px}
+button{width:100%;padding:11px;border:0;border-radius:8px;background:var(--main);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+button:hover{background:#245d9b}
+.err{color:#c0392b;font-size:12.5px;min-height:18px;margin-top:10px}
+</style></head><body>
+<form id="f">
+  <h1>CRレポート</h1>
+  <p>閲覧にはパスワードが必要です。</p>
+  <input id="pw" type="password" autocomplete="current-password" placeholder="パスワード" autofocus required>
+  <label><input id="rm" type="checkbox" checked> このブラウザに記憶する</label>
+  <button type="submit">表示する</button>
+  <div class="err" id="err"></div>
+</form>
+<script>
+(function(){
+const P = {"s": "W7h+FBuzntuvsdGZaWzHcQ==", "v": "oQi5KcC6w207OMl+", "i": 300000, "c": "8hZjoxMRFgdwhc30I0wFtdNEz5enVRRC2FC7ACr2GaMPGK3+fPfK4Ssf+/VwjVj6dhXVCZxBcgfLMDfHF+/ygUlPsAlfSDqsIuI/kzcCWeRlPkilBt9llPCZDB8vdBkkUuruMTNto2x2amTAXd2bHoDwKncx6EDX5tXrkUnjjIilI+0sv9zhkja4wt2SgtI2eA1rTpiK6CjaAZ+2uycXVNON2kTgBULS90CuocR4BUTD5kNupymzT7DrZXURL78chzhB78rrBtsnNllkw/bQdSjob3/Qt7f1wIujdP3tjlhc7G0KB4FXu5Z24EL4NgfFF8MxraGOOhWWZ4aG54eiysNUCYC9OeF6RniODlXs/MWoJmxaCf4z+2CB9hSyN4051ZiyYFIeEjSl/t1Qo9i+ubJ+xtq2gcNWu8IreNG+flr/XN7HlD86EMS05WfaI7r1ElZ8oIboSOKC3C8bv7BO6qBAQe+mTzIS8gu70enjEzHXbYzjnMV4PbHft72wBeNEI+xbFgfDVP8fktDzgbqVQhfObrT5ATNiDVKDkKpCiuF/AR345aoc7SmmUymK5CtyT16upfYBVyvEZ65Nw9TSlaLKBqgrgfGrSH0xybpWPDxjxq4V3Z3Ghvmec6/O9r8FXQxkGi6OPnf7cPyIqGn7PvYHONU7DjBH6qbbkNHM9HhdWjOYQlG5iqySejQqm2aunVNLPU7SiNXefRFDGVltCTlGXUGb2z9owxBYsT+iJJe6hkiB12Hv0z040Z1Ct4P5g4wpyZG2JR/s91/ZmKdEdV3LwOezFBBxpRITdIVfn4cVgg96sRboHxRHGbryYFTYWLOr+mMCm4Sy/sxcjxa/xjscQVPstdAVDhKrRnJCustD6Kqm/qlOsPME7Qg8wGkbAisXjuN3ljZUMEIbRdn5avCf9d1x7Yj1Gyrt9tvr8nl50L+1Vg0XvJrAd3++QGoLGpWQtjFadMgNjHa0uDe30aG2Vlu0hQ8bLccf+9AAmzHo+Q0TlF4cfttbJKkBKoLEY4EWjIcYmvBRZAHvvn/8HVHs5nk794LnSz1+G2pD4JmRrUqwshy3qUryHF3KeJegEJGYv4MKvs8Vjsm81Kdic8cBidRdL+wSH5kYa8AVRSMWrelLnwPlqLf/vMYUDW6ppccpRH8IjKf41EC1Nwr/LwnYPFJ35uoYaVRzPSu9Tsz2pB/xmC/Xo2FmlyqXAMv+N1HKaLhbzz12FHmVWuU/OLKNfk/6pNm0"};
+const KEY = 'cr-report-pw';
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function open(pw){
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey({name:'PBKDF2', salt:b64(P.s), iterations:P.i, hash:'SHA-256'},
+    base, {name:'AES-GCM', length:256}, false, ['decrypt']);
+  const buf = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64(P.v)}, key, b64(P.c));
+  const html = new TextDecoder().decode(buf);
+  document.open(); document.write(html); document.close();
+}
+const ls = {get(){try{return localStorage.getItem(KEY)}catch(e){return null}},
+            set(v){try{localStorage.setItem(KEY,v)}catch(e){}}, del(){try{localStorage.removeItem(KEY)}catch(e){}}};
+const saved = ls.get();
+if(saved) open(saved).catch(() => ls.del());
+document.getElementById('f').addEventListener('submit', async e => {
+  e.preventDefault();
+  const pw = document.getElementById('pw').value, err = document.getElementById('err');
+  err.textContent = '';
+  try{
+    if(document.getElementById('rm').checked) ls.set(pw); else ls.del();
+    await open(pw);
+  }catch(ex){ ls.del(); err.textContent = 'パスワードが違います'; }
+});
+})();
+</script>
+</body></html>
